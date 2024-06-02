@@ -16,7 +16,7 @@ app.use(morgan('tiny'));
 
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
-app.get('/', (req, res) => res.send('<h1>Hello Express</h1>'));
+app.get('/', (req, res) => res.send('<h1>Hello</h1>'));
 
 
 

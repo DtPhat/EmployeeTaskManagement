@@ -1,6 +1,6 @@
 const { transporter, mailSender } = require("../config/nodemailer")
 const { twilioClient, serviceSid } = require("../config/twilio")
-const { generateAccessCode } = require("../utils/generator")
+const { generateAccessCode, generateJWT } = require("../utils/generator")
 const { User } = require("../models")
 const createPhoneAccessCode = async (req, res) => {
   const { phoneNumber } = req.body
@@ -118,20 +118,25 @@ const validateEmailAccessCode = async (req, res) => {
     const snapshot = await User
       .where('email.emailAddress', '==', email)
       .where('email.accessCode', '==', accessCode)
+      .limit(1)
       .get();
 
     if (snapshot.empty) {
-      return res.status(400).send({ message: 'Invalid token' });
+      return res.status(400).send({ message: 'Invalid code' });
     }
 
-    snapshot.forEach(doc => {
-      doc.ref.update({ email: {
-        emailAddress: doc.data().email.emailAddress,
+    const userDoc = snapshot.docs[0]
+
+    const updatedValue = await userDoc?.ref.update({
+      email: {
+        emailAddress: userDoc.data().email.emailAddress,
         accessToken: null,
-      } });
+      }
     });
 
-    res.status(200).send({ message: 'Access granted' });
+    const accessToken = generateJWT(userDoc.id)
+
+    res.status(200).send({ message: 'Access granted', accessToken });
   } catch (error) {
     res.status(500).send({ message: error.toString() });
   }

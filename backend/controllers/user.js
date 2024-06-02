@@ -32,7 +32,7 @@ const createUser = async (req, res) => {
     if (!snapshot.empty) {
       return res.status(400).json('Email already exists');
     }
-    const databaseInfo = await User.doc().set(data)
+    const dbResponse = await User.doc().set(data)
 
     const verificationLink = `${FRONTEND_BASE_URL}/verify?token=${verificationToken}`;
 
@@ -43,7 +43,7 @@ const createUser = async (req, res) => {
       text: `Hello ${name},\n\nPlease verify your account by clicking the link: ${verificationLink}`
     };
 
-    const mailInfo = await transporter.sendMail(mailOptions)
+    const transporterResponse = await transporter.sendMail(mailOptions)
 
     return res.status(200).json({
       message: "User created successfully.",
@@ -58,6 +58,7 @@ const createUser = async (req, res) => {
     res.status(500).json(error?.message)
   }
 }
+
 
 const verifiyUser = async (req, res) => {
   const { token } = req.query
@@ -80,7 +81,98 @@ const verifiyUser = async (req, res) => {
 }
 
 
+const getUsers = async (req, res) => {
+  try {
+    const snapshot = await User.get();
+
+    if (snapshot.empty) {
+      return res.status(404).json('No users found');
+    }
+
+    const users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json({
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json(error?.message);
+  }
+}
+
+
+const updateUser = async (req, res) => {
+  const { id } = req.params;  // Get userId from URL parameters
+  const { role } = req.body
+
+
+  try {
+    const userDoc = await User.doc(id).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json('User not found');
+    }
+
+    await userDoc.ref.update({
+      role: role,
+    });
+
+    res.status(200).json('User updated successfully');
+  } catch (error) {
+    res.status(500).json(error.toString());
+  }
+}
+
+const updateProfile = async (req, res) => {
+  const { userId } = req
+  const { name, address } = req.body
+
+
+  try {
+    const userDoc = await User.doc(userId).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json('User not found');
+    }
+
+    await userDoc.ref.update({
+      name: name,
+      address: address,
+    });
+
+    res.status(200).json('User updated successfully');
+  } catch (error) {
+    res.status(500).json(error.toString());
+  }
+}
+
+
+const deleteUser = async (req, res) => {
+  const { id } = req.params;  // Get userId from URL parameters
+
+  try {
+    const userDoc = await User.doc(id).get();
+    if (!userDoc.exists) {
+      return res.status(404).send('User not found');
+    }
+
+    await userDoc.ref.delete();
+
+    res.status(200).send('User deleted successfully');
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
+}
+
+
+
 module.exports = {
   createUser,
-  verifiyUser
+  verifiyUser,
+  getUsers,
+  updateUser,
+  deleteUser,
+  updateProfile
 }
