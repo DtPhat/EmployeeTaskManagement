@@ -13,17 +13,17 @@ const authorize = (requiredRoles) => {
     try {
       const decodedValue = jwt.verify(token, jwtSecret);
 
-      req.userId = decodedValue.userId;
-
-      const currentUserDoc = await User.doc(req.userId).get()
-
+      const currentUserDoc = await User.doc(decodedValue.userId).get()
+      
       if (!currentUserDoc.exists) {
         return res.status(404).json('Access Denied: User not found');
       }
+      const currentUserData = currentUserDoc.data()
+      
+      req.userId = decodedValue.userId;
+      req.userRole = currentUserData.role;
 
-      const crrentUserData = currentUserDoc.data()
-
-      if (requiredRoles && !requiredRoles?.includes(crrentUserData.role)) {
+      if (requiredRoles && !requiredRoles?.includes(currentUserData.role)) {
         return res.status(403).json({ message: 'Access Denied: Not allowed role' });
       }
 

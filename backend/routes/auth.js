@@ -10,6 +10,7 @@ const router = express.Router();
 
 router.route('/phone').post(createPhoneAccessCode);
 router.route('/phone/validate').post(validatePhoneAccessCode);
+
 router.route('/email').post(createEmailAccessCode);
 router.route('/email/validate').post(validateEmailAccessCode);
 
