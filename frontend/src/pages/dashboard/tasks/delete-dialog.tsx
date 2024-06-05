@@ -1,5 +1,6 @@
+import { useDeleteTaskMutation } from "@/app/services/task"
 import { useDeleteUserMutation } from "@/app/services/user"
-import { UserActionDialog } from "@/app/types"
+import { TaskActionDialog } from "@/app/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,21 +12,26 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
+import useSocket from "@/hooks/useSocket"
 import { useState } from "react"
+import { Socket } from "socket.io-client"
 
 
-export default function DeleteDialog({ data, TriggerButton, open, handleOpen }: UserActionDialog) {
-  const [deleteUser, { isLoading }] = useDeleteUserMutation()
+export default function DeleteTaskDialog({ data, TriggerButton, open, handleOpen }: TaskActionDialog) {
+  const socket: Socket | null = useSocket()
+  const [deleteTask, { isLoading }] = useDeleteTaskMutation()
   const handleDelete = async () => {
-    await deleteUser(data.id).unwrap()
-      .catch(error => console.error(error))
-      .finally(() => {
+    await deleteTask(data.id)
+      .unwrap()
+      .then(res => {
+        socket?.emit('taskDeleted', data.id)
         toast({
-          title: "Deleted",
+          title: "Task deleted successfully",
           description: `${data.name} has been deleted`,
         })
         handleOpen()
       })
+      .catch(error => console.error(error))
   }
   return (
     <Dialog open={open} onOpenChange={handleOpen}>

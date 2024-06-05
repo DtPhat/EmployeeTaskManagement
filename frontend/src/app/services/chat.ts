@@ -1,6 +1,6 @@
 import { api } from './api'
 
-export const userAPI = api.injectEndpoints({
+export const chatAPI = api.injectEndpoints({
   endpoints: (builder) => ({
     getMessages: builder.mutation({
       query: (room) => ({
@@ -13,4 +13,4 @@ export const userAPI = api.injectEndpoints({
 
 export const {
   useGetMessagesMutation
-} = userAPI
+} = chatAPI

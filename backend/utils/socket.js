@@ -2,7 +2,7 @@ const { db } = require("../config/firebase");
 const { Message } = require("../models");
 const { FieldValue } = require('firebase-admin/firestore');
 
-const chatSocket = (io) => {
+const socket = (io) => {
   io.on('connection', (socket) => {
     console.log('a user connected');
 
@@ -20,26 +20,23 @@ const chatSocket = (io) => {
           sender: sender,
           timestamp: FieldValue.serverTimestamp()
         });
-
-        // Emit the message to all clients in the room
         io.to(room).emit('chat message', { msg, room, sender });
       } catch (error) {
         console.error('Error saving message:', error);
       }
     });
 
-    socket.emit('initialTasks', tasks);
-
-    // Handle task creation
-    socket.on('createTask', (task) => {
-      tasks.push(task);
-      io.emit('taskCreated', task);  // Emit to all clients
+    socket.on('taskAdded', (task) => {
+      io.emit('taskAdded', task); // Broadcast to all clients
     });
 
-    // Handle task deletion
-    socket.on('deleteTask', (taskId) => {
-      tasks = tasks.filter(task => task.id !== taskId);
-      io.emit('taskDeleted', taskId);  // Emit to all clients
+    socket.on('taskUpdated', (task) => {
+      io.emit('taskUpdated', task); // Broadcast to all clients
+    });
+
+    socket.on('taskDeleted', (taskId) => {
+      console.log("ID:" , taskId)
+      io.emit('taskDeleted', taskId); // Broadcast to all clients
     });
 
     socket.on('disconnect', () => {
@@ -52,4 +49,4 @@ const chatSocket = (io) => {
   });
 };
 
-module.exports = chatSocket
+module.exports = socket

@@ -2,6 +2,11 @@ const { db } = require("../config/firebase");
 const { roles } = require("../utils/constants");
 const { Task, User } = require("../models");
 
+const getUserDetails = async (userId) => {
+  const userDoc = await User.doc(userId).get();
+  return userDoc.exists ? { id: userDoc.id, ...userDoc.data() } : null;
+};
+
 const createTask = async (req, res) => {
   try {
     const { assignee, startDate, dueDate, name, description, status } = req.body;
@@ -16,11 +21,14 @@ const createTask = async (req, res) => {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    console.log(newTask);
     const taskDoc = await Task.add(newTask);
     res.status(201).json({
       message: 'Task created successfully',
-      data: { id: taskDoc.id, ...newTask }
+      data: {
+        id: taskDoc.id, ...newTask,
+        assignee: await getUserDetails(assignee),
+        reporter: await getUserDetails(assignee)
+      }
     }
     );
 
@@ -29,10 +37,7 @@ const createTask = async (req, res) => {
   }
 };
 
-const getUserDetails = async (userId) => {
-  const userDoc = await User.doc(userId).get();
-  return userDoc.exists ? { id: userDoc.id, ...userDoc.data() } : null;
-};
+
 
 const getTasks = async (req, res) => {
   try {
@@ -76,7 +81,7 @@ const getTasks = async (req, res) => {
 const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const { assignee, startDate, dueDate, name, description, status, reporter } = req.body;
+    const { assignee, startDate, dueDate, name, description, status } = req.body;
 
     const updatedTask = {
       assignee,
@@ -85,7 +90,6 @@ const updateTask = async (req, res) => {
       name,
       description,
       status,
-      reporter,
       updatedAt: new Date()
     };
 
@@ -99,13 +103,12 @@ const updateTask = async (req, res) => {
     await docRef.set(updatedTask, { merge: true });
 
     const assigneeDetails = await getUserDetails(assignee);
-    const reporterDetails = await getUserDetails(reporter);
+    const reporterDetails = await getUserDetails(req.userId);
 
     res.status(200).json({
       data: { id, ...updatedTask, assignee: assigneeDetails, reporter: reporterDetails },
       message: 'Success'
-    }
-    );
+    });
   } catch (error) {
     res.status(400).json(error.message);
   }
@@ -133,10 +136,15 @@ const updateTaskStatus = async (req, res) => {
 
     await docRef.set(updatedTask, { merge: true });
 
+
+    const assigneeDetails = await getUserDetails(doc.data().assignee);
+    const reporterDetails = await getUserDetails(doc.data().reporter);
+
     res.status(200).json({
+      data: { id, ...doc.data(), assignee: assigneeDetails, reporter: reporterDetails, status },
       message: 'Success'
-    }
-    );
+    });
+
   } catch (error) {
     res.status(400).json(error.message);
   }
@@ -145,11 +153,11 @@ const updateTaskStatus = async (req, res) => {
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const docRef = Task.doc(id);
 
     const doc = await docRef.get();
-    
+
     if (!doc.exists) {
       return res.status(404).send('Task not found');
     }

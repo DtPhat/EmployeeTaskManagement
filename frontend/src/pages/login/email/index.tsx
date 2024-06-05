@@ -127,7 +127,7 @@ export default function emailLogin() {
             <Button variant="outline" size="icon" onClick={() => sendemailAccessCodeResponse.reset()}>
               <MoveLeft className="h-4 w-4" />
             </Button>
-            <Heading title="email verification" description="Please check your email and enter the code we've sent" />
+            <Heading title="Email verification" description="Please check your email and enter the code we've sent" />
             <Form {...validationForm}>
               <div className="w-96 space-y-6">
                 <FormField

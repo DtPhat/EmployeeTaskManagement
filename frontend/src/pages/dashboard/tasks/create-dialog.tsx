@@ -32,7 +32,7 @@ import { z } from "zod"
 
 import { taskStatuses } from "@/app/constants"
 import { useAppSelector } from "@/app/hooks"
-import { useCreateTaskMutation, useUpdateTaskMutation } from "@/app/services/task"
+import { useCreateTaskMutation } from "@/app/services/task"
 import { useGetUsersQuery } from "@/app/services/user"
 import { selectUserInfo } from "@/app/slices/auth"
 import StatusBadge from "@/components/status-badge"
@@ -49,8 +49,6 @@ import { useState } from "react"
 import { toast } from "@/components/ui/use-toast"
 import useSocket from "@/hooks/useSocket"
 import { Socket } from "socket.io-client"
-import { TaskActionDialog, Task } from "@/app/types"
-import { convertSecondsToDate } from "@/utils/date"
 
 const FormSchema = z.object({
   status: z.enum(["IN_PROGRESS", "TO_DO", "DONE"], { message: "Invalid status" }),
@@ -62,34 +60,38 @@ const FormSchema = z.object({
   }),
   assignee: z.string().min(1, { message: "Due date is required" }),
 })
-export default function UpdateTaskDialog({ data: taskData, TriggerButton, open, handleOpen }: TaskActionDialog) {
+export default function CreateTaskDialog() {
   const socket: Socket | null = useSocket()
   const userInfo = useAppSelector(selectUserInfo)
   const [serverError, setServerError] = useState()
-  const [updateTask, { isLoading: isCreating, isSuccess }] = useUpdateTaskMutation()
-  const { data: userData } = useGetUsersQuery({ role: "EMPLOYEE" })
-
+  const [createTask, { isLoading: isCreating, isSuccess }] = useCreateTaskMutation()
+  const [open, setOpen] = useState(false)
+  const { data : userData } = useGetUsersQuery({ role: "EMPLOYEE" })
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      status: taskData.status,
-      name: taskData.name,
-      startDate: new Date(convertSecondsToDate(taskData.startDate._seconds)),
-      dueDate: new Date(convertSecondsToDate(taskData.dueDate._seconds)),
-      assignee: taskData.assignee.id,
-      description: taskData.description
+      status: "TO_DO",
+      name: "",
+      startDate: new Date(),
+      dueDate: new Date(),
+      assignee: userInfo?.id,
     },
   })
 
+  const handleOpen = () => {
+    setOpen(!open)
+  }
+
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log(data)
     try {
-      await updateTask({ id: taskData.id, data })
+      await createTask({ ...data })
         .unwrap()
         .then((res: any) => {
-          socket?.emit('taskUpdated', res?.data)
+          socket?.emit('taskAdded', res?.data)
           toast({
-            title: "Updated task successfully",
-            description: "Task has been modified",
+            title: "Created task successfully",
+            description: "New task added",
           })
           handleOpen()
           form.reset()
@@ -105,7 +107,10 @@ export default function UpdateTaskDialog({ data: taskData, TriggerButton, open, 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        {TriggerButton}
+        <Button className="text-xs md:text-sm" onClick={() => setOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Task
+        </Button>
       </DialogTrigger>
       <DialogContent className="">
         <DialogHeader>

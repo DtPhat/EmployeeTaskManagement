@@ -7,7 +7,7 @@ const userRoutes = require('./routes/user');
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
 const taskRoutes = require('./routes/task');
-const chatSocket = require('./socket/chat')
+const socket = require('./utils/socket')
 const { corsOptions } = require('./config/cors');
 
 const PORT = 5000;
@@ -26,7 +26,7 @@ const server = http.createServer(app);
 
 const io = socketIo(server, { cors: corsOptions });
 
-chatSocket(io);
+socket(io);
 
 app.use('/users', userRoutes);
 

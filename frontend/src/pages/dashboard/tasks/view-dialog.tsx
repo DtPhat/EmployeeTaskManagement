@@ -10,6 +10,7 @@ import {
 import { Task } from '@/app/types'
 import StatusBadge from '@/components/status-badge'
 import { convertSecondsToDate } from '@/utils/date'
+import UserLabel from '@/components/user-label'
 
 interface Props {
   data: Task
@@ -42,13 +43,13 @@ const ViewDialog = ({ TriggerButton, data }: Props) => {
           <DialogDescription>
             <div className='text-base font-semibold flex gap-2'>
               <div className='text-black'>Reporter:</div>
-              {data.reporter?.name}
+              <UserLabel name={data.reporter?.name} />
             </div>
           </DialogDescription>
           <DialogDescription>
             <div className='text-base font-semibold flex gap-2'>
               <div className='text-black'>Assignee:</div>
-              {data.assignee?.name}
+              <UserLabel name={data.assignee?.name} />
             </div>
           </DialogDescription>
         </DialogContent>

@@ -32,14 +32,14 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useCreateUsersMutation, useUpdateUserMutation } from "@/app/services/user"
 import { roles } from "@/app/constants"
-import { ActionDialog, User } from "@/app/types"
+import { UserActionDialog, User } from "@/app/types"
 import { DialogClose } from "@radix-ui/react-dialog"
 
 const FormSchema = z.object({
   role: z.enum(["EMPLOYEE", "OWNER"], { message: "Invalid role" }),
 })
 
-export default function UpdateDialog({ data: user, TriggerButton, open, handleOpen }: ActionDialog) {
+export default function UpdateDialog({ data: user, TriggerButton, open, handleOpen }: UserActionDialog) {
   const [serverError, setServerError] = useState()
   const [updateUser, { isLoading: updateLoading }] = useUpdateUserMutation()
 

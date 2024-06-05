@@ -10,7 +10,7 @@ const AdminHeader = () => {
       <div className="px-5 w-full flex justify-center items-center container">
         <div className="w-full flex py-2 justify-between">
           <div className="flex gap-8">
-            <Link to="/admin" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
               {/* <img src="/icon.png" className="w-9 h-9" /> */}
               <div className="text-3xl flex justify-end font-bold font-serif">
                 <span className="text-blue-950">Task</span>

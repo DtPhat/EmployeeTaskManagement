@@ -109,7 +109,7 @@ const createEmailAccessCode = async (req, res) => {
   const accessCode = generateAccessCode();
 
   //For demo only
-  if (emailAddress == 'demo@gmail.com') {
+  if (emailAddress == 'tester@gmail.com') {
     await userDoc.ref.update({
       'email.accessCode': "123456"
     });

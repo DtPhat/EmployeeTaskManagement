@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { CellAction } from "./cell-action"
 import StatusBadge from "@/components/status-badge"
 import { convertSecondsToDate } from "@/utils/date"
+import UserLabel from "@/components/user-label"
 
 
 export const columns: ColumnDef<Task>[] = [
@@ -16,7 +17,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     header: "Assignee",
-    cell: ({ row }) => <p>{row.original.assignee?.name} </p>,
+    cell: ({ row }) => <p>{<UserLabel name={row.original.assignee?.name} />} </p>,
   },
   {
     header: "Status",
@@ -32,7 +33,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     header: "Reporter",
-    cell: ({ row }) => <p>{row.original.reporter?.name} </p>,
+    cell: ({ row }) => <p>{<UserLabel name={row.original.reporter?.name} />} </p>,
   },
   {
     id: "actions",

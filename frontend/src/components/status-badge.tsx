@@ -6,7 +6,7 @@ interface StatusProps {
 }
 const statusColors = {
   'IN_PROGRESS': 'bg-blue-100',
-  'TO_DO': 'bg-gray-100',
+  'TO_DO': 'bg-gray-200',
   'DONE': 'bg-green-100'
 }
 
@@ -16,8 +16,6 @@ const statusDisplay = {
   'DONE': 'Done'
 }
 const StatusBadge = ({ status }: StatusProps) => {
-  console.log(statusColors[status as TaskStatus]);
-
   return (
     <p className={` ${statusColors[status]} text-xs text-center p-1 rounded font-semibold w-20`}>
       {statusDisplay[status as TaskStatus]}

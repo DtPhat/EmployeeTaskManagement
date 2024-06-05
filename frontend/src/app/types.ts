@@ -53,8 +53,15 @@ export type Task = {
   };
 };
 
-export type ActionDialog = {
+export type UserActionDialog = {
   data: User
+  TriggerButton?: ReactNode,
+  open: boolean
+  handleOpen: () => void
+}
+
+export type TaskActionDialog = {
+  data: Task
   TriggerButton?: ReactNode,
   open: boolean
   handleOpen: () => void
