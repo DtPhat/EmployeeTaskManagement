@@ -109,7 +109,7 @@ export default function UpdateTaskDialog({ data: taskData, TriggerButton, open, 
       </DialogTrigger>
       <DialogContent className="">
         <DialogHeader>
-          <DialogTitle>Create task</DialogTitle>
+          <DialogTitle>Update task</DialogTitle>
           <DialogDescription>
             Add a new task to dashboard
           </DialogDescription>
